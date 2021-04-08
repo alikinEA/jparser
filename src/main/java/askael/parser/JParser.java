@@ -1,16 +1,9 @@
 package askael.parser;
 
-import java.nio.charset.StandardCharsets;
-
-/*
-    1. synchronize
-    2. contains value by name without allocations
-    3. parse int
-    4. parse
- */
 public class JParser {
     private static int counter = 0;
     private static int name_idx = 0;
+    private static int value_idx = 0;
     private static int main_idx = 0;
     private static int start_value_idx = 0;
 
@@ -26,6 +19,58 @@ public class JParser {
             return getIntValue(bytes);
         }
         return null;
+    }
+
+    public boolean containsInt(byte[] bytes, byte[] prName, byte[] value) {
+        if (parse(bytes, prName)) {
+            return containsIntValue(bytes, value);
+        }
+        return false;
+    }
+
+    public boolean containsString(byte[] bytes, byte[] prName, byte[] value) {
+        if (parse(bytes, prName)) {
+            return containsStringValue(bytes, value);
+        }
+        return false;
+    }
+
+    private boolean containsStringValue(byte[] bytes, byte[] value) {
+        while (main_idx != bytes.length - 1) {
+            main_idx++;
+            if (bytes[main_idx] == Const.QUOTE) {
+                if (start_value_idx == 0) {
+                    start_value_idx = main_idx + 1;
+                } else {
+                    return true;
+                }
+            } else if (start_value_idx != 0) {
+                if (value[value_idx] != bytes[main_idx]) {
+                    return false;
+                } else {
+                    value_idx++;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean containsIntValue(byte[] bytes, byte[] value) {
+        while (main_idx != bytes.length - 1) {
+            main_idx++;
+            if (bytes[main_idx] == Const.COLON) {
+                start_value_idx = main_idx + 1;
+            } else if ((bytes[main_idx] == Const.COMMA || bytes[main_idx] == Const.CLOSE_BRACKET) && start_value_idx != 0) {
+                return true;
+            } else {
+                if (value[value_idx] != bytes[main_idx]) {
+                    return false;
+                } else {
+                    value_idx++;
+                }
+            }
+        }
+        return false;
     }
 
     public synchronized boolean parse(byte[] bytes, byte[] prName) {
@@ -85,5 +130,6 @@ public class JParser {
         counter = 0;
         name_idx = 0;
         start_value_idx = 0;
+        value_idx = 0;
     }
 }
