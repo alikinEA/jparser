@@ -1,5 +1,8 @@
 package askael.parser;
 
+/**
+ * This class is not thread-safe, need to create new object for each thread.
+ */
 public class JParser {
     private static int counter = 0;
     private static int name_idx = 0;
@@ -73,7 +76,7 @@ public class JParser {
         return false;
     }
 
-    public synchronized boolean parse(byte[] bytes, byte[] prName) {
+    public boolean parse(byte[] bytes, byte[] prName) {
         stateCleanUp();
         while (main_idx != bytes.length - 1) {
             if (prName[name_idx] == bytes[main_idx]) {
