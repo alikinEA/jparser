@@ -16,14 +16,19 @@ public class JParserTest {
     private final String STRING_PR_NAME = "string";
     private final String STRING_VALUE = "Hello World";
 
-    private final String NUMBER_PR_NAME = "number";
-    private final Integer NUMBER_VALUE = 123;
+    private final String INT_PR_NAME = "number";
+    private final Integer INT_VALUE = 123;
+
+    private final String INT_ARR_PR_NAME = "intArray";
+    private final Integer INT_ARRAY_VALUE_1 = 1;
+    private final Integer INT_ARRAY_VALUE_2 = 2;
+    private final Integer INT_ARRAY_VALUE_3 = 3;
 
     private final String BOOLEAN_PR_NAME_TRUE = "booleanTrue";
     private final String BOOLEAN_PR_NAME_FALSE = "booleanFalse";
 
     private final String UNDEFINED_PR_NAME = "undefined";
-    private final String UNDEFINED_NUMBER_VALUE = "233";
+    private final String UNDEFINED_INT_VALUE = "233";
     private final String UNDEFINED_STRING_VALUE = "undefined";
 
     @BeforeEach
@@ -36,7 +41,7 @@ public class JParserTest {
     public void parseString_shouldReturnStringValueByPropertyName_whenPropertyExists() {
         var result = parser.parseString(JSON.getBytes(), STRING_PR_NAME.getBytes());
 
-        Assertions.assertArrayEquals(result , STRING_VALUE.getBytes());
+        Assertions.assertArrayEquals(STRING_VALUE.getBytes(), result);
     }
 
     @Test
@@ -48,9 +53,9 @@ public class JParserTest {
 
     @Test
     public void parseInt_shouldReturnIntValueByPropertyName_whenPropertyExists() {
-        var result = parser.parseInt(JSON.getBytes(), NUMBER_PR_NAME.getBytes());
+        var result = parser.parseInt(JSON.getBytes(), INT_PR_NAME.getBytes());
 
-        Assertions.assertArrayEquals(result , NUMBER_VALUE.toString().getBytes());
+        Assertions.assertArrayEquals(INT_VALUE.toString().getBytes(), result);
     }
 
     @Test
@@ -62,21 +67,21 @@ public class JParserTest {
 
     @Test
     public void containsIntValue_shouldReturnTrue_whenPropertyAndValueAreExists() {
-        var result = parser.containsInt(JSON.getBytes(), NUMBER_PR_NAME.getBytes(), NUMBER_VALUE.toString().getBytes());
+        var result = parser.containsInt(JSON.getBytes(), INT_PR_NAME.getBytes(), INT_VALUE.toString().getBytes());
 
         Assertions.assertTrue(result);
     }
 
     @Test
     public void containsIntValue_shouldReturnFalse_whenPropertyExistsButValueNotExists() {
-        var result = parser.containsInt(JSON.getBytes(), NUMBER_PR_NAME.getBytes(), Integer.valueOf(UNDEFINED_NUMBER_VALUE).toString().getBytes());
+        var result = parser.containsInt(JSON.getBytes(), INT_PR_NAME.getBytes(), Integer.valueOf(UNDEFINED_INT_VALUE).toString().getBytes());
 
         Assertions.assertFalse(result);
     }
 
     @Test
     public void containsIntValue_shouldReturnTrue_whenPropertyAndValueAreNotExists() {
-        var result = parser.containsInt(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes(), Integer.valueOf(UNDEFINED_NUMBER_VALUE).toString().getBytes());
+        var result = parser.containsInt(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes(), Integer.valueOf(UNDEFINED_INT_VALUE).toString().getBytes());
 
         Assertions.assertFalse(result);
     }
@@ -103,26 +108,53 @@ public class JParserTest {
     }
 
     @Test
-    public void getBooleanValue_shouldReturnTrue_whenPropertyAndValueExists() {
+    public void parseBoolean_shouldReturnTrue_whenPropertyAndValueExists() {
         var result = parser.parseBoolean(JSON.getBytes(), BOOLEAN_PR_NAME_TRUE.getBytes());
 
         Assertions.assertTrue(result);
     }
 
     @Test
-    public void getBooleanValue_shouldReturnFalse_whenPropertyAndValueExists() {
+    public void parseBoolean_shouldReturnFalse_whenPropertyAndValueExists() {
         var result = parser.parseBoolean(JSON.getBytes(), BOOLEAN_PR_NAME_FALSE.getBytes());
 
         Assertions.assertFalse(result);
     }
 
     @Test
-    public void getBooleanValue_shouldReturnNull_whenPropertyNotExists() {
+    public void parseBoolean_shouldReturnNull_whenPropertyNotExists() {
         var result = parser.parseBoolean(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes());
 
         Assertions.assertNull(result);
     }
 
+    @Test
+    public void parseIntArray_shouldReturnFirstValue_whenIndexExists() {
+        var result = parser.parseIntArray(JSON.getBytes(), INT_ARR_PR_NAME.getBytes(), 0);
+
+        Assertions.assertArrayEquals(INT_ARRAY_VALUE_1.toString().getBytes(), result);
+    }
+
+    @Test
+    public void parseIntArray_shouldReturnSecondValue_whenIndexExists() {
+        var result = parser.parseIntArray(JSON.getBytes(), INT_ARR_PR_NAME.getBytes(), 1);
+
+        Assertions.assertArrayEquals(INT_ARRAY_VALUE_2.toString().getBytes(), result);
+    }
+
+    @Test
+    public void parseIntArray_shouldReturnLastValue_whenIndexExists() {
+        var result = parser.parseIntArray(JSON.getBytes(), INT_ARR_PR_NAME.getBytes(), 2);
+
+        Assertions.assertArrayEquals(INT_ARRAY_VALUE_3.toString().getBytes(), result);
+    }
+
+    @Test
+    public void parseIntArray_shouldReturnNullValue_whenIndexNotExists() {
+        var result = parser.parseIntArray(JSON.getBytes(), INT_ARR_PR_NAME.getBytes(), 4);
+
+        Assertions.assertNull(result);
+    }
 
     @Test
     public void multiExecution_shouldWorkCorrect() {
@@ -131,8 +163,8 @@ public class JParserTest {
         var result2 = parser.parseString(JSON.getBytes(), STRING_PR_NAME.getBytes());
 
         // THEN
-        Assertions.assertArrayEquals(result1 , STRING_VALUE.getBytes());
-        Assertions.assertArrayEquals(result2 , STRING_VALUE.getBytes());
+        Assertions.assertArrayEquals(STRING_VALUE.getBytes(), result1);
+        Assertions.assertArrayEquals(STRING_VALUE.getBytes(), result2);
     }
 
 }

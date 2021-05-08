@@ -8,51 +8,58 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class PerformanceTest {
 
     private static final JParser jParser = new JParser();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String NAME_PR = "name";
-    private static final byte[] NAME_PR_BYTES = NAME_PR.getBytes();
+    private static final String JSON = readFile();
+    private static final byte[] JSON_BYTES = JSON.getBytes();
 
-    private static final String NAME_VALUE = "Ivan";
-    private static final byte[] NAME_VALUE_BYTES = NAME_VALUE.getBytes();
+    private static final String STRING_PR_NAME = "color";
+    private static final byte[] STRING_PR_NAME_BYTES = STRING_PR_NAME.getBytes();
 
-    private static final String AGE_PR = "age";
-    private static final int AGE_VALUE = 20;
-
-    private static final String JSON_1 = "{\"" + NAME_PR + "\":\"" + NAME_VALUE + "\"," +
-            "\"" + AGE_PR + "\":" + AGE_VALUE + "}";
-
-    private static final byte[] JSON_1_BYTES = JSON_1.getBytes();
+    private static final String STRING_VALUE = "gold";
+    private static final byte[] STRING_VALUE_BYTES = STRING_VALUE.getBytes();
 
     public static void main(String[] args) throws Exception {
         org.openjdk.jmh.Main.main(args);
+    }
+
+    private static String readFile() {
+        try {
+            return String.join("", Files.readAllLines(Path.of("src/test/java/resources/test.json")));
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @Fork(value = 1, warmups = 1)
     public void jparser_getValueByName() {
-        String value = new String(jParser.parseString(JSON_1_BYTES, NAME_PR_BYTES));
-        assert NAME_VALUE.equals(value);
+        String value = new String(jParser.parseString(JSON_BYTES, STRING_PR_NAME_BYTES));
+        assert STRING_VALUE.equals(value);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @Fork(value = 1, warmups = 1)
     public void jackson_getValueByName() throws JsonProcessingException {
-        JsonNode jsonNode = objectMapper.readTree(JSON_1);
-        String value = jsonNode.get(NAME_PR).asText();
-        assert NAME_VALUE.equals(value);
+        JsonNode jsonNode = objectMapper.readTree(JSON);
+        String value = jsonNode.get(STRING_PR_NAME).asText();
+        assert STRING_VALUE.equals(value);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @Fork(value = 1, warmups = 1)
     public void jparser_containsByParamAndValue() {
-        boolean value = jParser.containsString(JSON_1_BYTES, NAME_PR_BYTES, NAME_VALUE_BYTES);
+        boolean value = jParser.containsString(JSON_BYTES, STRING_PR_NAME_BYTES, STRING_VALUE_BYTES);
         assert Boolean.TRUE.equals(value);
     }
 
@@ -60,8 +67,8 @@ public class PerformanceTest {
     @BenchmarkMode(Mode.Throughput)
     @Fork(value = 1, warmups = 1)
     public void jackson_containsByParamAndValue() throws JsonProcessingException {
-        JsonNode jsonNode = objectMapper.readTree(JSON_1);
-        String value = jsonNode.get(NAME_PR).asText();
-        assert NAME_VALUE.equals(value);
+        JsonNode jsonNode = objectMapper.readTree(JSON);
+        String value = jsonNode.get(STRING_PR_NAME).asText();
+        assert STRING_VALUE.equals(value);
     }
 }

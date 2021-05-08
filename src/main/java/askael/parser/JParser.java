@@ -2,13 +2,16 @@ package askael.parser;
 
 /**
  * This class is not thread-safe, need to create new object for each thread.
+ * Only LATIN-1 support
  */
 public class JParser {
     public static final byte COLON = (byte) ':';
     public static final byte COMMA = (byte) ',';
     public static final byte QUOTE = (byte) '\"';
     public static final byte CLOSE_BRACKET = (byte) '}';
-    public static final byte SPACE = (byte) ' ';
+    public static final byte OPEN_ARR_BRACKET = (byte) '[';
+    public static final byte CLOSE_ARR_BRACKET = (byte) ']';
+    public static final byte SPACE = (char) 32;
     public static final byte T = (byte) 't';
 
     private static int counter = 0;
@@ -42,6 +45,36 @@ public class JParser {
     public byte[] parseInt(byte[] bytes, byte[] prName) {
         if (moveToValue(bytes, prName)) {
             return getIntValue(bytes);
+        }
+        return null;
+    }
+
+    public byte[] parseIntArray(byte[] bytes, byte[] prName, int itemIdx) {
+        if (moveToValue(bytes, prName)) {
+            return getArrIntValue(bytes, itemIdx);
+        }
+        return null;
+    }
+
+    private byte[] getArrIntValue(byte[] bytes, int itemIdx) {
+        counter = 0;
+        start_value_idx = main_idx;
+
+        while (main_idx != bytes.length - 1) {
+            if ((bytes[main_idx] == COMMA || bytes[main_idx] == SPACE || bytes[main_idx] == CLOSE_ARR_BRACKET)) {
+                if (counter < itemIdx && bytes[main_idx] == CLOSE_ARR_BRACKET) {
+                    return null;
+                }
+                if (counter == itemIdx) {
+                    return createBytesResult(bytes);
+                } else {
+                    skipDividers(bytes);
+                    start_value_idx = main_idx;
+                    counter++;
+                    continue;
+                }
+            }
+            main_idx++;
         }
         return null;
     }
@@ -130,7 +163,7 @@ public class JParser {
     }
 
     private void skipDividers(byte[] bytes) {
-        while (bytes[main_idx] == SPACE || bytes[main_idx] == COLON)
+        while (bytes[main_idx] == COMMA || bytes[main_idx] == SPACE || bytes[main_idx] == COLON || bytes[main_idx] == OPEN_ARR_BRACKET)
             main_idx++;
     }
 
