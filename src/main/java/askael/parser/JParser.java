@@ -11,28 +11,28 @@ public class JParser {
     private static int start_value_idx = 0;
 
     public byte[] parseString(byte[] bytes, byte[] prName) {
-        if (parse(bytes, prName)) {
+        if (moveToValue(bytes, prName)) {
             return getStringValue(bytes);
         }
         return null;
     }
 
     public byte[] parseInt(byte[] bytes, byte[] prName) {
-        if (parse(bytes, prName)) {
+        if (moveToValue(bytes, prName)) {
             return getIntValue(bytes);
         }
         return null;
     }
 
     public boolean containsInt(byte[] bytes, byte[] prName, byte[] value) {
-        if (parse(bytes, prName)) {
+        if (moveToValue(bytes, prName)) {
             return containsIntValue(bytes, value);
         }
         return false;
     }
 
     public boolean containsString(byte[] bytes, byte[] prName, byte[] value) {
-        if (parse(bytes, prName)) {
+        if (moveToValue(bytes, prName)) {
             return containsStringValue(bytes, value);
         }
         return false;
@@ -40,30 +40,28 @@ public class JParser {
 
     private boolean containsStringValue(byte[] bytes, byte[] value) {
         while (main_idx != bytes.length - 1) {
-            main_idx++;
             if (bytes[main_idx] == Const.QUOTE) {
                 if (start_value_idx == 0) {
                     start_value_idx = main_idx + 1;
                 } else {
                     return true;
                 }
-            } else if (start_value_idx != 0) {
+            } else {
                 if (value[value_idx] != bytes[main_idx]) {
                     return false;
                 } else {
                     value_idx++;
                 }
             }
+
+            main_idx++;
         }
         return false;
     }
 
     private boolean containsIntValue(byte[] bytes, byte[] value) {
         while (main_idx != bytes.length - 1) {
-            main_idx++;
-            if (bytes[main_idx] == Const.COLON) {
-                start_value_idx = main_idx + 1;
-            } else if ((bytes[main_idx] == Const.COMMA || bytes[main_idx] == Const.CLOSE_BRACKET) && start_value_idx != 0) {
+            if ((bytes[main_idx] == Const.COMMA || bytes[main_idx] == Const.CLOSE_BRACKET)) {
                 return true;
             } else {
                 if (value[value_idx] != bytes[main_idx]) {
@@ -72,44 +70,64 @@ public class JParser {
                     value_idx++;
                 }
             }
+
+            main_idx++;
         }
         return false;
     }
 
-    public boolean parse(byte[] bytes, byte[] prName) {
+    public boolean moveToValue(byte[] bytes, byte[] prName) {
         stateCleanUp();
         while (main_idx != bytes.length - 1) {
+
+            //skip spaces
+            if (bytes[main_idx] == Const.SPACE) {
+                main_idx++;
+                continue;
+            }
+
+            // check property name
             if (prName[name_idx] == bytes[main_idx]) {
                 counter++;
                 name_idx++;
-                if (counter == prName.length) {
-                    main_idx++;//close quote
+                if (counter == prName.length && bytes[main_idx + 1] == Const.QUOTE) {
+                    // last name byte + close quote
+                    main_idx = main_idx + 2;
+
+                    skipDividers(bytes);
                     return true;
                 }
             } else {
                 counter = 0;
                 name_idx = 0;
             }
+
             main_idx++;
         }
         return false;
     }
 
-    private byte[] getIntValue(byte[] bytes) {
-        while (main_idx != bytes.length - 1) {
+    private void skipDividers(byte[] bytes) {
+        while (bytes[main_idx] == Const.SPACE ||
+                bytes[main_idx] == Const.COLON)
             main_idx++;
-            if (bytes[main_idx] == Const.COLON) {
-                start_value_idx = main_idx + 1;
-            } else if ((bytes[main_idx] == Const.COMMA || bytes[main_idx] == Const.CLOSE_BRACKET) && start_value_idx != 0) {
+    }
+
+    private byte[] getIntValue(byte[] bytes) {
+        start_value_idx = main_idx;
+
+        while (main_idx != bytes.length - 1) {
+            if ((bytes[main_idx] == Const.COMMA || bytes[main_idx] == Const.CLOSE_BRACKET)) {
                 return createBytesResult(bytes);
             }
+
+            main_idx++;
         }
         return null;
     }
 
     private byte[] getStringValue(byte[] bytes) {
         while (main_idx != bytes.length - 1) {
-            main_idx++;
             if (bytes[main_idx] == Const.QUOTE) {
                 if (start_value_idx == 0) {
                     start_value_idx = main_idx + 1;
@@ -117,6 +135,8 @@ public class JParser {
                     return createBytesResult(bytes);
                 }
             }
+
+            main_idx++;
         }
         return null;
     }
@@ -127,7 +147,9 @@ public class JParser {
         return result;
     }
 
-
+    /**
+     * reset all internal indexes
+     */
     private void stateCleanUp() {
         main_idx = 0;
         counter = 0;

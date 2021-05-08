@@ -4,111 +4,97 @@ package askael.parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class JParserTest {
 
     private JParser parser;
-    private static final String NAME_PR = "name";
-    private static final String NAME_VALUE = "Ivan";
+    private static String JSON;
 
-    private static final String AGE_PR = "age";
-    private static final int AGE_VALUE = 20;
+    private final String STRING_PR_NAME = "string";
+    private final String STRING_VALUE = "Hello World";
 
-    private static final String JSON_1 = "{\"" + NAME_PR + "\":\"" + NAME_VALUE + "\"," +
-        "\"" + AGE_PR + "\":" + AGE_VALUE + "}";
-    private static final String JSON_2 = "{\"" + AGE_PR + "\":" + AGE_VALUE + "," +
-            "\"" + NAME_PR + "\":\"" + NAME_VALUE + "\"}";
+    private final String NUMBER_PR_NAME = "number";
+    private final Integer NUMBER_VALUE = 123;
 
-
-    private static Stream<String> getJSONs() {
-        return Stream.of(JSON_1, JSON_2);
-    }
+    private final String UNDEFINED_PR_NAME = "undefined";
+    private final String UNDEFINED_NUMBER_VALUE = "233";
+    private final String UNDEFINED_STRING_VALUE = "undefined";
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         parser = new JParser();
+        JSON = String.join("", Files.readAllLines(Path.of("src/test/java/resources/test.json")));
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void parseString_shouldReturnStringValueByPropertyName_whenPropertyExists(String json) {
-        var result = parser.parseString(json.getBytes(), NAME_PR.getBytes());
+    @Test
+    public void parseString_shouldReturnStringValueByPropertyName_whenPropertyExists() {
+        var result = parser.parseString(JSON.getBytes(), STRING_PR_NAME.getBytes());
 
-        Assertions.assertArrayEquals(result , NAME_VALUE.getBytes());
+        Assertions.assertArrayEquals(result , STRING_VALUE.getBytes());
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void parseString_shouldNotReturnStringValueByPropertyName_whenPropertyNotExists(String json) {
-        var result = parser.parseString(json.getBytes(), "price".getBytes());
+    @Test
+    public void parseString_shouldNotReturnStringValueByPropertyName_whenPropertyNotExists() {
+        var result = parser.parseString(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes());
 
         Assertions.assertNull(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void parseInt_shouldReturnIntValueByPropertyName_whenPropertyExists(String json) {
-        var result = parser.parseInt(json.getBytes(), AGE_PR.getBytes());
+    @Test
+    public void parseInt_shouldReturnIntValueByPropertyName_whenPropertyExists() {
+        var result = parser.parseInt(JSON.getBytes(), NUMBER_PR_NAME.getBytes());
 
-        Assertions.assertArrayEquals(result , Integer.valueOf(AGE_VALUE).toString().getBytes());
+        Assertions.assertArrayEquals(result , NUMBER_VALUE.toString().getBytes());
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void parseInt_shouldReturnIntValueByPropertyName_whenPropertyNotExists(String json) {
-        var result = parser.parseInt(json.getBytes(), "price".getBytes());
+    @Test
+    public void parseInt_shouldReturnIntValueByPropertyName_whenPropertyNotExists() {
+        var result = parser.parseInt(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes());
 
         Assertions.assertNull(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void containsIntValue_shouldReturnTrue_whenPropertyAndValueAreExists(String json) {
-        var result = parser.containsInt(json.getBytes(), AGE_PR.getBytes(), Integer.valueOf(AGE_VALUE).toString().getBytes());
+    @Test
+    public void containsIntValue_shouldReturnTrue_whenPropertyAndValueAreExists() {
+        var result = parser.containsInt(JSON.getBytes(), NUMBER_PR_NAME.getBytes(), NUMBER_VALUE.toString().getBytes());
 
         Assertions.assertTrue(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void containsIntValue_shouldReturnFalse_whenPropertyExistsButValueNotExists(String json) {
-        var result = parser.containsInt(json.getBytes(), AGE_PR.getBytes(), Integer.valueOf(21).toString().getBytes());
+    @Test
+    public void containsIntValue_shouldReturnFalse_whenPropertyExistsButValueNotExists() {
+        var result = parser.containsInt(JSON.getBytes(), NUMBER_PR_NAME.getBytes(), Integer.valueOf(UNDEFINED_NUMBER_VALUE).toString().getBytes());
 
         Assertions.assertFalse(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void containsIntValue_shouldReturnTrue_whenPropertyAndValueAreNotExists(String json) {
-        var result = parser.containsInt(json.getBytes(), "price".getBytes(), Integer.valueOf(21).toString().getBytes());
+    @Test
+    public void containsIntValue_shouldReturnTrue_whenPropertyAndValueAreNotExists() {
+        var result = parser.containsInt(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes(), Integer.valueOf(UNDEFINED_NUMBER_VALUE).toString().getBytes());
 
         Assertions.assertFalse(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void containsStringValue_shouldReturnTrue_whenPropertyAndValueAreExists(String json) {
-        var result = parser.containsString(json.getBytes(), NAME_PR.getBytes(), NAME_VALUE.getBytes());
+    @Test
+    public void containsStringValue_shouldReturnTrue_whenPropertyAndValueAreExists() {
+        var result = parser.containsString(JSON.getBytes(), STRING_PR_NAME.getBytes(), STRING_VALUE.getBytes());
 
         Assertions.assertTrue(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void containsStringValue_shouldReturnFalse_whenPropertyExistsButValueNotExists(String json) {
-        var result = parser.containsString(json.getBytes(), NAME_PR.getBytes(), "Vasya".getBytes());
+    @Test
+    public void containsStringValue_shouldReturnFalse_whenPropertyExistsButValueNotExists() {
+        var result = parser.containsString(JSON.getBytes(), STRING_PR_NAME.getBytes(), UNDEFINED_STRING_VALUE.getBytes());
 
         Assertions.assertFalse(result);
     }
 
-    @ParameterizedTest
-    @MethodSource("getJSONs")
-    public void containsStringValue_shouldReturnTrue_whenPropertyAndValueAreNotExists(String json) {
-        var result = parser.containsString(json.getBytes(), "price".getBytes(), "Vasya".getBytes());
+    @Test
+    public void containsStringValue_shouldReturnTrue_whenPropertyAndValueAreNotExists() {
+        var result = parser.containsString(JSON.getBytes(), UNDEFINED_STRING_VALUE.getBytes(), UNDEFINED_STRING_VALUE.getBytes());
 
         Assertions.assertFalse(result);
     }
@@ -117,18 +103,12 @@ public class JParserTest {
     @Test
     public void multiExecution_shouldWorkCorrect() {
         // WHEN
-        var result1 = parser.parseString(JSON_1.getBytes(), NAME_PR.getBytes());
-        var result2 = parser.parseString(JSON_2.getBytes(), NAME_PR.getBytes());
-
-        var result3 = parser.parseInt(JSON_1.getBytes(), AGE_PR.getBytes());
-        var result4 = parser.parseInt(JSON_2.getBytes(), AGE_PR.getBytes());
+        var result1 = parser.parseString(JSON.getBytes(), STRING_PR_NAME.getBytes());
+        var result2 = parser.parseString(JSON.getBytes(), STRING_PR_NAME.getBytes());
 
         // THEN
-        Assertions.assertArrayEquals(result1 , NAME_VALUE.getBytes());
-        Assertions.assertArrayEquals(result2 , NAME_VALUE.getBytes());
-
-        Assertions.assertArrayEquals(result3 , Integer.valueOf(AGE_VALUE).toString().getBytes());
-        Assertions.assertArrayEquals(result4 , Integer.valueOf(AGE_VALUE).toString().getBytes());
+        Assertions.assertArrayEquals(result1 , STRING_VALUE.getBytes());
+        Assertions.assertArrayEquals(result2 , STRING_VALUE.getBytes());
     }
 
 }
