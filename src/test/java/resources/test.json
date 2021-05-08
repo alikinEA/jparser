@@ -4,7 +4,8 @@
     2,
     3
   ],
-  "boolean": true,
+  "booleanTrue": true,
+  "booleanFalse": false,
   "color": "gold",
   "null": null,
   "number": 123,

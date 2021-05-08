@@ -19,6 +19,9 @@ public class JParserTest {
     private final String NUMBER_PR_NAME = "number";
     private final Integer NUMBER_VALUE = 123;
 
+    private final String BOOLEAN_PR_NAME_TRUE = "booleanTrue";
+    private final String BOOLEAN_PR_NAME_FALSE = "booleanFalse";
+
     private final String UNDEFINED_PR_NAME = "undefined";
     private final String UNDEFINED_NUMBER_VALUE = "233";
     private final String UNDEFINED_STRING_VALUE = "undefined";
@@ -94,9 +97,30 @@ public class JParserTest {
 
     @Test
     public void containsStringValue_shouldReturnTrue_whenPropertyAndValueAreNotExists() {
-        var result = parser.containsString(JSON.getBytes(), UNDEFINED_STRING_VALUE.getBytes(), UNDEFINED_STRING_VALUE.getBytes());
+        var result = parser.containsString(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes(), UNDEFINED_STRING_VALUE.getBytes());
 
         Assertions.assertFalse(result);
+    }
+
+    @Test
+    public void getBooleanValue_shouldReturnTrue_whenPropertyAndValueExists() {
+        var result = parser.parseBoolean(JSON.getBytes(), BOOLEAN_PR_NAME_TRUE.getBytes());
+
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void getBooleanValue_shouldReturnFalse_whenPropertyAndValueExists() {
+        var result = parser.parseBoolean(JSON.getBytes(), BOOLEAN_PR_NAME_FALSE.getBytes());
+
+        Assertions.assertFalse(result);
+    }
+
+    @Test
+    public void getBooleanValue_shouldReturnNull_whenPropertyNotExists() {
+        var result = parser.parseBoolean(JSON.getBytes(), UNDEFINED_PR_NAME.getBytes());
+
+        Assertions.assertNull(result);
     }
 
 
