@@ -1,6 +1,11 @@
 # Jparser
  json parser with minimum memory allocations
 
+ToDo:
+- array contains
+- array iterator
+- parse nested objects
+
 Benchmark                                         Mode  Cnt        Score        Error  Units
 PerformanceTest.jackson_containsByParamAndValue  thrpt    5   665869,997 ±  26466,298  ops/s
 PerformanceTest.jackson_getValueByName           thrpt    5   675037,812 ±  21664,669  ops/s

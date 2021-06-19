@@ -24,6 +24,11 @@ public class JParserTest {
     private final Integer INT_ARRAY_VALUE_2 = 2;
     private final Integer INT_ARRAY_VALUE_3 = 3;
 
+    private final String STR_ARR_PR_NAME = "strArray";
+    private final String STR_ARRAY_VALUE_1 = "str1";
+    private final String STR_ARRAY_VALUE_2 = "str2";
+    private final String STR_ARRAY_VALUE_3 = "str3";
+
     private final String BOOLEAN_PR_NAME_TRUE = "booleanTrue";
     private final String BOOLEAN_PR_NAME_FALSE = "booleanFalse";
 
@@ -155,6 +160,35 @@ public class JParserTest {
 
         Assertions.assertNull(result);
     }
+
+    @Test
+    public void parseStrArray_shouldReturnFirstValue_whenIndexExists() {
+        var result = parser.parseStrArray(JSON.getBytes(), STR_ARR_PR_NAME.getBytes(), 0);
+
+        Assertions.assertArrayEquals(STR_ARRAY_VALUE_1.getBytes(), result);
+    }
+
+    @Test
+    public void parseStrArray_shouldReturnSecondValue_whenIndexExists() {
+        var result = parser.parseStrArray(JSON.getBytes(), STR_ARR_PR_NAME.getBytes(), 1);
+
+        Assertions.assertArrayEquals(STR_ARRAY_VALUE_2.getBytes(), result);
+    }
+
+    @Test
+    public void parseStrArray_shouldReturnLastValue_whenIndexExists() {
+        var result = parser.parseStrArray(JSON.getBytes(), STR_ARR_PR_NAME.getBytes(), 2);
+
+        Assertions.assertArrayEquals(STR_ARRAY_VALUE_3.getBytes(), result);
+    }
+
+    @Test
+    public void parseStrArray_shouldReturnNullValue_whenIndexNotExists() {
+        var result = parser.parseStrArray(JSON.getBytes(), STR_ARR_PR_NAME.getBytes(), 4);
+
+        Assertions.assertNull(result);
+    }
+
 
     @Test
     public void multiExecution_shouldWorkCorrect() {

@@ -4,6 +4,11 @@
     2,
     3
   ],
+  "strArray": [
+    "str1",
+    "str2",
+    "str3"
+  ],
   "booleanTrue": true,
   "booleanFalse": false,
   "color": "gold",

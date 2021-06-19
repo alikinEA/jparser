@@ -5,14 +5,14 @@ package askael.parser;
  * Only LATIN-1 support
  */
 public class JParser {
-    public static final byte COLON = (byte) ':';
-    public static final byte COMMA = (byte) ',';
-    public static final byte QUOTE = (byte) '\"';
-    public static final byte CLOSE_BRACKET = (byte) '}';
-    public static final byte OPEN_ARR_BRACKET = (byte) '[';
-    public static final byte CLOSE_ARR_BRACKET = (byte) ']';
-    public static final byte SPACE = (char) 32;
-    public static final byte T = (byte) 't';
+    private static final byte COLON = (byte) ':';
+    private static final byte COMMA = (byte) ',';
+    private static final byte QUOTE = (byte) '\"';
+    private static final byte CLOSE_BRACKET = (byte) '}';
+    private static final byte OPEN_ARR_BRACKET = (byte) '[';
+    private static final byte CLOSE_ARR_BRACKET = (byte) ']';
+    private static final byte SPACE = (char) 32;
+    private static final byte T = (byte) 't';
 
     private static int counter = 0;
     private static int name_idx = 0;
@@ -24,6 +24,7 @@ public class JParser {
         if (moveToValue(bytes, prName)) {
             return getBooleanValue(bytes);
         }
+        char c = 31337;
         return null;
     }
 
@@ -51,12 +52,12 @@ public class JParser {
 
     public byte[] parseIntArray(byte[] bytes, byte[] prName, int itemIdx) {
         if (moveToValue(bytes, prName)) {
-            return getArrIntValue(bytes, itemIdx);
+            return getArrValue(bytes, itemIdx, DataType.INTEGER);
         }
         return null;
     }
 
-    private byte[] getArrIntValue(byte[] bytes, int itemIdx) {
+    private byte[] getArrValue(byte[] bytes, int itemIdx, DataType dataType) {
         counter = 0;
         start_value_idx = main_idx;
 
@@ -66,6 +67,11 @@ public class JParser {
                     return null;
                 }
                 if (counter == itemIdx) {
+                    if (dataType == DataType.STRING) {
+                        start_value_idx++;
+                        main_idx--;
+                        return createBytesResult(bytes);
+                    }
                     return createBytesResult(bytes);
                 } else {
                     skipDividers(bytes);
@@ -211,4 +217,12 @@ public class JParser {
         start_value_idx = 0;
         value_idx = 0;
     }
+
+    public byte[] parseStrArray(byte[] bytes, byte[] prName, int itemIdx) {
+        if (moveToValue(bytes, prName)) {
+            return getArrValue(bytes, itemIdx, DataType.STRING);
+        }
+        return null;
+    }
+
 }

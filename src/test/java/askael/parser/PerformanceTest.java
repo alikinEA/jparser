@@ -26,6 +26,11 @@ public class PerformanceTest {
     private static final String STRING_VALUE = "gold";
     private static final byte[] STRING_VALUE_BYTES = STRING_VALUE.getBytes();
 
+    private static final String STR_ARR_PR_NAME = "strArray";
+    private static final byte[] STR_ARR_PR_NAME_BYTES = STR_ARR_PR_NAME.getBytes();
+
+    private static final String STR_ARRAY_VALUE_2 = "str2";
+
     public static void main(String[] args) throws Exception {
         org.openjdk.jmh.Main.main(args);
     }
@@ -70,5 +75,22 @@ public class PerformanceTest {
         JsonNode jsonNode = objectMapper.readTree(JSON);
         String value = jsonNode.get(STRING_PR_NAME).asText();
         assert STRING_VALUE.equals(value);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @Fork(value = 1, warmups = 1)
+    public void jparser_getArrayStrValue() {
+        String value = new String(jParser.parseStrArray(JSON_BYTES, STR_ARR_PR_NAME_BYTES, 1));
+        assert STR_ARRAY_VALUE_2.equals(value);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @Fork(value = 1, warmups = 1)
+    public void jackson_getArrayStrValue() throws JsonProcessingException {
+        JsonNode jsonNode = objectMapper.readTree(JSON);
+        String value = jsonNode.get(STR_ARR_PR_NAME).get(1).asText();
+        assert STR_ARRAY_VALUE_2.equals(value);
     }
 }
